@@ -1,0 +1,4 @@
+---
+zbx_packages: [zabbix-server-mysql, zabbix-frontend-php, zabbix-apache-conf, zabbix-sql-scripts]
+zbx_services: [zabbix-server, apache2]
+...

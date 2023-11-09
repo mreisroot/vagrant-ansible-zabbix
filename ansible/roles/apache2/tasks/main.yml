@@ -1,0 +1,10 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Apache HTTP server
+  ansible.builtin.apt:
+    name: apache2
+    state: present
+...

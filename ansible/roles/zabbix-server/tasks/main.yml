@@ -1,0 +1,83 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install xz-utils
+  ansible.builtin.apt:
+    name: xz-utils
+    state: present
+
+- name: Add the Official Zabbix repository
+  ansible.builtin.apt:
+    deb: https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4+debian11_all.deb
+    state: present
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Run the apache2 role
+  ansible.builtin.include_role:
+    name: apache2
+
+- name: Install Zabbix packages
+  ansible.builtin.apt:
+    name: "{{ zbx_packages }}"
+    state: present
+
+- name: Run the mysql-server role
+  ansible.builtin.include_role:
+    name: mysql-server
+
+- name: Set the password for Zabbix server
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: "^# DBPassword="
+    line: "DBPassword=zabbix"
+
+- name: Edit the Apache Document Root
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/000-default.conf
+    regexp: "DocumentRoot /var/www/html"
+    replace: "DocumentRoot /usr/share/zabbix"
+
+- name: Install Locales package
+  ansible.builtin.apt:
+    name: locales
+    state: present
+
+- name: Enable the en_US locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^# en_US.UTF-8 UTF-8"
+    line: en_US.UTF-8 UTF-8
+
+- name: Enable the en_GB locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^# en_GB.UTF-8 UTF-8"
+    line: en_GB.UTF-8 UTF-8
+
+- name: Enable the pt_BR locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^# pt_BR.UTF-8 UTF-8"
+    line: pt_BR.UTF-8 UTF-8
+
+- name: Load locales
+  ansible.builtin.shell: 
+    cmd: locale-gen
+
+- name: Enable Zabbix services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: true
+  loop: "{{ zbx_services }}"
+
+- name: Restart Zabbix services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ zbx_services }}"
+...

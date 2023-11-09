@@ -1,0 +1,3 @@
+---
+mysql_packages: [default-mysql-server, default-mysql-client, python3-pymysql]
+...

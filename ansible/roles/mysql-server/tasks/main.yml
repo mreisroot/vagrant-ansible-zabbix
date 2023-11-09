@@ -1,0 +1,74 @@
+---
+- name: Update cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install MySQL and PyMySQL
+  ansible.builtin.apt:
+    name: "{{ mysql_packages }}"
+
+- name: Enable MySQL service
+  ansible.builtin.service:
+    name: mysqld
+    enabled: true
+
+- name: Restart MySQL service
+  ansible.builtin.service:
+    name: mysqld
+    state: restarted
+
+- name: Secure MySQL Installation
+  community.mysql.mysql_query:
+    login_user: root
+    login_unix_socket: /run/mysqld/mysqld.sock
+    query:
+      - ALTER USER 'root'@'localhost' IDENTIFIED BY '123Zabbix';
+      - DELETE FROM mysql.user WHERE User = '';
+      - DELETE FROM mysql.user WHERE User = 'root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+      - DROP DATABASE IF EXISTS test;
+      - DELETE FROM mysql.db WHERE Db = 'test' OR Db = 'test\\_%';
+      - FLUSH PRIVILEGES;
+
+- name: Create initial zabbix database
+  community.mysql.mysql_db:
+    login_user: root
+    login_password: 123Zabbix
+    name: zabbix
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+    state: present
+
+- name: Create user zabbix that has all privileges on the zabbix database
+  community.mysql.mysql_user:
+    login_user: root
+    login_password: 123Zabbix
+    name: zabbix
+    password: zabbix
+    priv: 'zabbix.*:ALL'
+    state: present
+
+- name: Enable log_bin_trust_function_creators option
+  community.mysql.mysql_variables:
+    login_user: root
+    login_password: 123Zabbix
+    variable: log_bin_trust_function_creators
+    mode: global
+    value: "1"
+
+- name: Import initial schema and data
+  community.mysql.mysql_db:
+    login_user: zabbix
+    login_password: zabbix
+    name: zabbix
+    encoding: utf8mb4
+    state: import
+    target: /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
+
+- name: Disable log_bin_trust_function_creators option after importing database schema
+  community.mysql.mysql_variables:
+    login_user: root
+    login_password: 123Zabbix
+    variable: log_bin_trust_function_creators
+    mode: global
+    value: "0"
+...

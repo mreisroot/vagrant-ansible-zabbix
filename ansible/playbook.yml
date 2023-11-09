@@ -1,0 +1,8 @@
+---
+- name: Deploy the full Zabbix stack on a single server
+  hosts: default
+  become: true
+  roles:
+    - zabbix-server
+    - zabbix-agent
+...
