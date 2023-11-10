@@ -24,6 +24,6 @@ Once the login screen of Zabbix appears, type the following credentials:
 
 **Password**: zabbix
 
-Enjoy your monitoring. :smile:
+Enjoy your monitoring. :smiley:
 
 LET'S GO!
