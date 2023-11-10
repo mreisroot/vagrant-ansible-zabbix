@@ -1,23 +1,23 @@
 ---
-- name: Update cache
+- name: Atualizar o cache do apt
   ansible.builtin.apt:
     update_cache: true
 
-- name: Install MySQL and PyMySQL
+- name: Instalar MySQL e PyMySQL
   ansible.builtin.apt:
     name: "{{ mysql_packages }}"
 
-- name: Enable MySQL service
+- name: Habilitar o serviço do MySQL
   ansible.builtin.service:
     name: mysqld
     enabled: true
 
-- name: Restart MySQL service
+- name: Reiniciar o serviço do MySQL
   ansible.builtin.service:
     name: mysqld
     state: restarted
 
-- name: Secure MySQL Installation
+- name: Configurar a segurança do MySQL
   community.mysql.mysql_query:
     login_user: root
     login_unix_socket: /run/mysqld/mysqld.sock
@@ -29,7 +29,7 @@
       - DELETE FROM mysql.db WHERE Db = 'test' OR Db = 'test\\_%';
       - FLUSH PRIVILEGES;
 
-- name: Create initial zabbix database
+- name: Criar o banco de dados zabbix
   community.mysql.mysql_db:
     login_user: root
     login_password: 123Zabbix
@@ -38,7 +38,7 @@
     collation: utf8mb4_bin
     state: present
 
-- name: Create user zabbix that has all privileges on the zabbix database
+- name: Criar o usuário zabbix, que tem todos os privilégios no banco de dados zabbix
   community.mysql.mysql_user:
     login_user: root
     login_password: 123Zabbix
@@ -47,7 +47,7 @@
     priv: 'zabbix.*:ALL'
     state: present
 
-- name: Enable log_bin_trust_function_creators option
+- name: Habilitar a opção log_bin_trust_function_creators
   community.mysql.mysql_variables:
     login_user: root
     login_password: 123Zabbix
@@ -55,7 +55,7 @@
     mode: global
     value: "1"
 
-- name: Import initial schema and data
+- name: Importar tabelas do banco de dados zabbix
   community.mysql.mysql_db:
     login_user: zabbix
     login_password: zabbix
@@ -64,7 +64,7 @@
     state: import
     target: /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
 
-- name: Disable log_bin_trust_function_creators option after importing database schema
+- name: Desabilitar a opção log_bin_trust_function_creators após importar as tabelas do banco de dados
   community.mysql.mysql_variables:
     login_user: root
     login_password: 123Zabbix

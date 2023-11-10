@@ -1,15 +1,15 @@
 ---
-- name: Install Zabbix Agent
+- name: Instalar o Zabbix Agent
   ansible.builtin.apt:
     name: zabbix-agent
     state: present
 
-- name: Enable Zabbix Agent service
+- name: Habilitar o serviço do Zabbix Agent
   ansible.builtin.service:
     name: zabbix-agent
     enabled: true
 
-- name: Restart Zabbix Agent service
+- name: Reiniciar o serviço do Zabbix Agent
   ansible.builtin.service:
     name: zabbix-agent
     state: restarted

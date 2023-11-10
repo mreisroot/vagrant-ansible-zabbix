@@ -1,5 +1,5 @@
 ---
-- name: Deploy the full Zabbix stack on a single server
+- name: Implantar a stack completa do Zabbix em um único servidor
   hosts: default
   become: true
   roles:
