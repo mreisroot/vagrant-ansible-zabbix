@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
 
-  # Define provider and allocate resources
+  # Definir provider e alocar recursos
   config.vm.provider "virtualbox" do |vb|
     vb.name = "venus"
     vb.cpus = 1
@@ -8,27 +8,18 @@ Vagrant.configure("2") do |config|
     vb.gui = false
   end
 
-  # Define OS, hostname and networking
+  # Definir SO, hostname e redes
   config.vm.box = "debian/bullseye64"
   config.vm.hostname = "venus"
   config.vm.network "private_network", ip: "192.168.56.2"
 
-  # Install Python3
-  config.vm.provision "shell", inline:<<-'EOF'
-    apt update
-    apt install -y python3
-  EOF
+  # Script de pré-requisitos do ansible
+  config.vm.provision "shell", path: "provision.sh"
 
-  # Share the ansible folder with the guest
+  # Compartilhar a pasta ansible com o sistema convidado
   config.vm.synced_folder "ansible", "/ansible"
 
-  # Set the default python interpreter for ansible as python3
-  config.vm.provision "shell", inline:<<-'EOF'
-    mkdir /etc/ansible
-    echo -e "[defaults]\ninterpreter_python = auto" > /etc/ansible/ansible.cfg
-  EOF
-
-  # Provision the VM
+  # Provisionar a VM
   config.vm.provision "ansible_local" do |ansible|
     ansible.install_mode = "pip"
     ansible.version = "2.10.7"
